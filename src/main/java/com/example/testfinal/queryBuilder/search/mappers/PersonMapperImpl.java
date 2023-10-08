@@ -1,5 +1,8 @@
 package com.example.testfinal.queryBuilder.search.mappers;
 
+import com.example.testfinal.exceptions.impl.person.InvalidOrNoParameterProvidedException;
+import com.example.testfinal.exceptions.impl.person.PersonMappingException;
+import com.example.testfinal.exceptions.impl.person.PersonTypeNotExistException;
 import com.example.testfinal.model.Person;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +23,15 @@ public class PersonMapperImpl {
     }
 
     public Person map(ResultSet rs) throws Exception {
-        return Optional.ofNullable(mappers.get(rs.getString("person_type")))
+        String type = rs.getString("person_type");
+        return Optional.ofNullable(mappers.get(type))
                 .map(mapper -> {
                     try {
                         return mapper.map(rs);
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new PersonMappingException();
                     }
                 })
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(() -> new PersonTypeNotExistException(type));
     }
 }
