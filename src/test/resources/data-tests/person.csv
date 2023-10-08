@@ -1,0 +1,4 @@
+person_type,name,surname,pesel,height,weight,email,employment_start_date,position,salary,school_name,year_of_study,field_of_study,scholarship,pension,years_worked
+STUDENT,name1,surname1,91862494108,10,10,email1@test.com,null,null,null,school,2,field,100,null,null
+EMPLOYEE,name2,surname2,91863494108,20,20,email2@test.com,2005-01-01,position1,5000,null,null,null,null,null,null
+PENSIONER,name3,surname3,92863494108,30,30,email3@test.com,null,null,null,null,null,null,null,2000,30

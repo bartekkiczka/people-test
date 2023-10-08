@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet author="bartek" id="2-1">
+        <loadData encoding="UTF-8" file="data-tests/person.csv" quotchar="&quot;" separator="," tableName="person">
+            <column header="id" name="id"/>
+            <column header="person_type" name="person_type"/>
+            <column header="name" name="name"/>
+            <column header="surname" name="surname"/>
+            <column header="pesel" name="pesel"/>
+            <column header="height" name="height"/>
+            <column header="weight" name="weight"/>
+            <column header="email" name="email"/>
+            <column header="version" name="version"/>
+            <column header="school_name" name="school_name"/>
+            <column header="year_of_study" name="year_of_study"/>
+            <column header="field_of_study" name="field_of_study"/>
+            <column header="scholarship" name="scholarship"/>
+            <column header="employment_start_date" name="employment_start_date"/>
+            <column header="position" name="position"/>
+            <column header="salary" name="salary"/>
+            <column header="pension" name="pension"/>
+            <column header="years_worked" name="years_worked"/>
+        </loadData>
+
+    </changeSet>
+
+    <changeSet author="bartek" id="4">
+        <loadData encoding="UTF-8" file="data-tests/job.csv" quotchar="&quot;" separator="," tableName="job">
+            <column header="name" name="name"/>
+            <column header="salary" name="salary"/>
+            <column header="start_date" name="start_date"/>
+            <column header="end_date" name="end_date"/>
+        </loadData>
+
+    </changeSet>
+</databaseChangeLog>
