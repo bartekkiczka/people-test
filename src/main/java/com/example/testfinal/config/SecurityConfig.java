@@ -30,7 +30,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/people").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/people/{id}").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/upload").hasAnyRole("ADMIN", "IMPORTER")
-                .requestMatchers(HttpMethod.POST, "jobs/{jobId}/employee/{employeeId}").hasAnyRole("ADMIN", "EMPLOYEE")
+                .requestMatchers(HttpMethod.PATCH, "jobs/{jobId}/employee/{employeeId}").hasAnyRole("ADMIN", "EMPLOYEE")
                 .and()
                 .httpBasic().and()
                 .csrf().disable();
