@@ -157,7 +157,7 @@ class JobControllerTest {
     public void testGetEmployeeJobsShouldReturnJobs() throws Exception {
         jobService.addEmployeeJob(2, 1);
 
-        mvc.perform(get("/jobs/employee/2/jobs"))
+        mvc.perform(get("/jobs/employee/2"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id").value(1))
@@ -171,22 +171,22 @@ class JobControllerTest {
 
     @Test
     public void testGetEmployeeJobsShouldThrowPersonIsNotEmployeeException() throws Exception {
-        mvc.perform(get("/jobs/employee/1/jobs"))
+        mvc.perform(get("/jobs/employee/1"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.statusCode").value(400))
                 .andExpect(jsonPath("$.message").value("Person with id 1 is not an Employee"))
-                .andExpect(jsonPath("$.description").value("uri=/jobs/employee/1/jobs"));
+                .andExpect(jsonPath("$.description").value("uri=/jobs/employee/1"));
     }
 
     @Test
     public void testGetEmployeeJobsShouldThrowPersonNotExistsException() throws Exception {
-        mvc.perform(get("/jobs/employee/999/jobs"))
+        mvc.perform(get("/jobs/employee/999"))
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.statusCode").value(404))
                 .andExpect(jsonPath("$.message").value("Can't find person with id: 999"))
-                .andExpect(jsonPath("$.description").value("uri=/jobs/employee/999/jobs"));
+                .andExpect(jsonPath("$.description").value("uri=/jobs/employee/999"));
     }
 
 
@@ -201,7 +201,7 @@ class JobControllerTest {
 
         //when
         //then
-        mvc.perform(get("/jobs/employee/2/jobs"))
+        mvc.perform(get("/jobs/employee/2"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id").value(1))
@@ -274,7 +274,7 @@ class JobControllerTest {
                 .andExpect(status().isOk());
 
         //then
-        mvc.perform(get("/jobs/employee/2/jobs"))
+        mvc.perform(get("/jobs/employee/2"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", empty()));

@@ -47,7 +47,7 @@ public class JobController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/employee/{id}/jobs")
+    @GetMapping("/employee/{id}")
     public ResponseEntity<List<JobDto>> findEmployeeJobs(@PathVariable long id){
         List<JobDto> jobDtos = jobService.getEmployeeJobs(id).stream()
                 .map(job -> modelMapper.map(job, JobDto.class)).collect(Collectors.toList());
