@@ -22,7 +22,6 @@ public class EmployeeEditor implements PersonEditor<Employee> {
     @Override
     public Employee edit(Employee employee, EditPersonCommand command) {
         Map<String, Object> parameters = command.getParameters();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         String name = getStringParameters("name", parameters);
         String surname = getStringParameters("surname", parameters);
         long pesel = getLongParameters("pesel", parameters);
@@ -30,7 +29,7 @@ public class EmployeeEditor implements PersonEditor<Employee> {
         int weight = getIntegerParameters("weight", parameters);
         String email = getStringParameters("email", parameters);
         String employmentStartDateString = getStringParameters("employmentStartDate", parameters);
-        LocalDate employmentStartDate = LocalDate.parse(employmentStartDateString, formatter);
+        LocalDate employmentStartDate = LocalDate.parse(employmentStartDateString);
         String positions = getStringParameters("position", parameters);
         int salary = getIntegerParameters("salary", parameters);
 
