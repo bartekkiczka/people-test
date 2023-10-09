@@ -1,6 +1,5 @@
 package com.example.testfinal.editor.person;
 
-import com.example.testfinal.enums.PersonTypes;
 import com.example.testfinal.model.Pensioner;
 import com.example.testfinal.model.Person;
 import com.example.testfinal.model.command.edit.EditPersonCommand;
@@ -11,15 +10,15 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class PensionerEditor implements PersonEditor {
+public class PensionerEditor implements PersonEditor<Pensioner> {
 
     @Override
     public String getType() {
-        return PersonTypes.PENSIONER.toString();
+        return "PENSIONER";
     }
 
     @Override
-    public Person edit(Person person, EditPersonCommand command) {
+    public Pensioner edit(Pensioner pensioner, EditPersonCommand command) {
         Map<String, Object> parameters = command.getParameters();
         String name = getStringParameters("name", parameters);
         String surname = getStringParameters("surname", parameters);
@@ -30,7 +29,6 @@ public class PensionerEditor implements PersonEditor {
         int pension = getIntegerParameters("pension", parameters);
         int yearsWorked = getIntegerParameters("yearsWorked", parameters);
 
-        Pensioner pensioner = (Pensioner) person;
         pensioner.setName(name);
         pensioner.setSurname(surname);
         pensioner.setPesel(pesel);

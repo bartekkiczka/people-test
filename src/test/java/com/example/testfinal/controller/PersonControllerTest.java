@@ -2,7 +2,9 @@ package com.example.testfinal.controller;
 
 import com.example.testfinal.DatabaseCleaner;
 import com.example.testfinal.exceptions.impl.person.PersonNotFoundException;
-import com.example.testfinal.model.*;
+import com.example.testfinal.model.Employee;
+import com.example.testfinal.model.Job;
+import com.example.testfinal.model.Pensioner;
 import com.example.testfinal.model.command.create.CreatePersonCommand;
 import com.example.testfinal.model.command.edit.EditPersonCommand;
 import com.example.testfinal.repository.JobRepository;
@@ -21,13 +23,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -72,7 +73,7 @@ class PersonControllerTest {
         //given
         //when
         //then
-        mvc.perform(get("/person"))
+        mvc.perform(get("/people"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id").value(1))
@@ -122,7 +123,7 @@ class PersonControllerTest {
         String searchRequestJson = objectMapper.writeValueAsString(searchRequest);
         //when
         //then
-        mvc.perform(get("/person/search")
+        mvc.perform(get("/people/search")
                         .param("name", "name1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(searchRequestJson))
@@ -154,7 +155,7 @@ class PersonControllerTest {
         String searchRequestJson = objectMapper.writeValueAsString(searchRequest);
         //when
         //then
-        mvc.perform(get("/person/search")
+        mvc.perform(get("/people/search")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(searchRequestJson))
                 .andDo(print())
@@ -176,14 +177,14 @@ class PersonControllerTest {
 
         //when
         //then
-        mvc.perform(get("/person/search")
+        mvc.perform(get("/people/search")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(searchRequestJson))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.statusCode").value(400))
                 .andExpect(jsonPath("$.message").value("Invalid or no parameter provided"))
-                .andExpect(jsonPath("$.description").value("uri=/person/search"));
+                .andExpect(jsonPath("$.description").value("uri=/people/search"));
     }
 
     @Test
@@ -196,79 +197,14 @@ class PersonControllerTest {
 
         String searchRequestJson = objectMapper.writeValueAsString(searchRequest);
 
-        mvc.perform(get("/person/search")
+        mvc.perform(get("/people/search")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(searchRequestJson))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.statusCode").value(400))
                 .andExpect(jsonPath("$.message").value("Provided parameter does not exists"))
-                .andExpect(jsonPath("$.description").value("uri=/person/search"));
-    }
-
-    @Test
-    public void testGetEmployeesWithJobsShouldFindEmployees() throws Exception {
-        //given
-        Employee employee = (Employee) personService.findById(2);
-        Job job = jobService.findById(1);
-
-        //when
-        personService.addEmployeeJob(employee.getId(), job.getId());
-
-        //then
-        mvc.perform(get("/person/employees"))
-                .andDo(print())
-                .andExpect(jsonPath("$.[0].id").value(2))
-                .andExpect(jsonPath("$.[0].name").value("name2"))
-                .andExpect(jsonPath("$.[0].surname").value("surname2"))
-                .andExpect(jsonPath("$.[0].pesel").value(91863494108L))
-                .andExpect(jsonPath("$.[0].height").value(20))
-                .andExpect(jsonPath("$.[0].weight").value(20))
-                .andExpect(jsonPath("$.[0].email").value("email2@test.com"))
-                .andExpect(jsonPath("$.[0].employmentStartDate").value("2005-01-01"))
-                .andExpect(jsonPath("$.[0].position").value("position1"))
-                .andExpect(jsonPath("$.[0].salary").value(5000))
-                .andExpect(jsonPath("$.[0].jobs[0].id").value(1))
-                .andExpect(jsonPath("$.[0].jobs[0].name").value("name1"))
-                .andExpect(jsonPath("$.[0].jobs[0].salary").value(2500))
-                .andExpect(jsonPath("$.[0].jobs[0].startDate").value("2020-01-01"))
-                .andExpect(jsonPath("$.[0].jobs[0].endDate").value("2021-01-01"))
-                .andExpect(jsonPath("$.[0].jobs[0].employeeId").value(2));
-    }
-
-    @Test
-    public void testGetEmployeeJobsShouldReturnJobs() throws Exception {
-        personService.addEmployeeJob(2, 1);
-
-        mvc.perform(get("/person/employee/2/jobs"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0].id").value(1))
-                .andExpect(jsonPath("$.[0].name").value("name1"))
-                .andExpect(jsonPath("$.[0].salary").value(2500))
-                .andExpect(jsonPath("$.[0].startDate").value("2020-01-01"))
-                .andExpect(jsonPath("$.[0].endDate").value("2021-01-01"))
-                .andExpect(jsonPath("$.[0].employeeId").value(2));
-    }
-
-    @Test
-    public void testGetEmployeeJobsShouldThrowPersonIsNotEmployeeException() throws Exception {
-        mvc.perform(get("/person/employee/1/jobs"))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.statusCode").value(400))
-                .andExpect(jsonPath("$.message").value("Person with id 1 is not an Employee"))
-                .andExpect(jsonPath("$.description").value("uri=/person/employee/1/jobs"));
-    }
-
-    @Test
-    public void testGetEmployeeJobsShouldThrowPersonNotExistsException() throws Exception {
-        mvc.perform(get("/person/employee/999/jobs"))
-                .andDo(print())
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.statusCode").value(404))
-                .andExpect(jsonPath("$.message").value("Can't find person with id: 999"))
-                .andExpect(jsonPath("$.description").value("uri=/person/employee/999/jobs"));
+                .andExpect(jsonPath("$.description").value("uri=/people/search"));
     }
 
     @Test
@@ -289,15 +225,15 @@ class PersonControllerTest {
                 .build();
         String commandJson = objectMapper.writeValueAsString(command);
 
-        mvc.perform(get("/person/4"))
+        mvc.perform(get("/people/4"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.statusCode").value(404))
                 .andExpect(jsonPath("$.message").value("Can't find person with id: 4"))
-                .andExpect(jsonPath("$.description").value("uri=/person/4"));
+                .andExpect(jsonPath("$.description").value("uri=/people/4"));
 
         //when
         //then
-        mvc.perform(post("/person")
+        mvc.perform(post("/people")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(commandJson)
                         .header("Authorization", ADMIN_ROLE_VALUE))
@@ -315,7 +251,7 @@ class PersonControllerTest {
                 .andExpect(jsonPath("$.yearsWorked").value(30))
                 .andReturn();
 
-        mvc.perform(get("/person/4"))
+        mvc.perform(get("/people/4"))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.id").value(4))
@@ -348,7 +284,7 @@ class PersonControllerTest {
                 .build();
         String commandJson = objectMapper.writeValueAsString(command);
 
-        mvc.perform(post("/person")
+        mvc.perform(post("/people")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(commandJson))
                 .andDo(print())
@@ -367,7 +303,7 @@ class PersonControllerTest {
 
         //when
         //then
-        mvc.perform(post("/person")
+        mvc.perform(post("/people")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(commandJson)
                         .header("Authorization", ADMIN_ROLE_VALUE))
@@ -375,7 +311,7 @@ class PersonControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.statusCode").value(400))
                 .andExpect(jsonPath("$.message").value("Person of type X don't exist"))
-                .andExpect(jsonPath("$.description").value("uri=/person"));
+                .andExpect(jsonPath("$.description").value("uri=/people"));
     }
 
     @Test
@@ -396,7 +332,7 @@ class PersonControllerTest {
                 .build();
         String commandJson = objectMapper.writeValueAsString(command);
 
-        mvc.perform(post("/person")
+        mvc.perform(post("/people")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(commandJson)
                         .header("Authorization", ADMIN_ROLE_VALUE))
@@ -405,7 +341,7 @@ class PersonControllerTest {
                 .andExpect(jsonPath("$.statusCode").value(400))
                 .andExpect(jsonPath("$.message", containsString("NAME_IS_EMPTY")))
                 .andExpect(jsonPath("$.message", containsString("NAME_IS_NULL")))
-                .andExpect(jsonPath("$.description").value("uri=/person"));
+                .andExpect(jsonPath("$.description").value("uri=/people"));
     }
 
     @Test
@@ -429,7 +365,7 @@ class PersonControllerTest {
         String personJson = objectMapper.writeValueAsString(editPersonCommand);
 
         //when
-        mvc.perform(get("/person/3"))
+        mvc.perform(get("/people/3"))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.id").value(3))
@@ -444,7 +380,7 @@ class PersonControllerTest {
                 .andExpect(jsonPath("$.yearsWorked").value(30))
                 .andReturn();
 
-        mvc.perform(put("/person/3")
+        mvc.perform(put("/people/3")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(personJson)
                         .header("Authorization", ADMIN_ROLE_VALUE))
@@ -463,7 +399,7 @@ class PersonControllerTest {
                 .andReturn();
 
         //then
-        mvc.perform(get("/person/3"))
+        mvc.perform(get("/people/3"))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.id").value(3))
@@ -497,7 +433,7 @@ class PersonControllerTest {
 
         String personJson = objectMapper.writeValueAsString(editPersonCommand);
 
-        mvc.perform(put("/person/3")
+        mvc.perform(put("/people/3")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(personJson))
                 .andDo(print())
@@ -513,7 +449,7 @@ class PersonControllerTest {
 
         //when
         //then
-        mvc.perform(put("/person/999")
+        mvc.perform(put("/people/999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", ADMIN_ROLE_VALUE)
                         .content(personJson))
@@ -521,7 +457,7 @@ class PersonControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.statusCode").value(404))
                 .andExpect(jsonPath("$.message").value("Can't find person with id: 999"))
-                .andExpect(jsonPath("$.description").value("uri=/person/999"));
+                .andExpect(jsonPath("$.description").value("uri=/people/999"));
     }
 
     @Test
@@ -543,7 +479,7 @@ class PersonControllerTest {
                 .build();
         String editPersonCommandJson = objectMapper.writeValueAsString(editPersonCommand);
 
-        mvc.perform(put("/person/2")
+        mvc.perform(put("/people/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", ADMIN_ROLE_VALUE)
                         .content(editPersonCommandJson))
@@ -551,129 +487,56 @@ class PersonControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.statusCode").value(400))
                 .andExpect(jsonPath("$.message").value("Wrong parameters provided"))
-                .andExpect(jsonPath("$.description").value("uri=/person/2"));
+                .andExpect(jsonPath("$.description").value("uri=/people/2"));
 
-    }
-
-    @Test
-    public void testAddEmployeeJobShouldAddJob() throws Exception {
-        //given
-        mvc.perform(patch("/person/employee/2/job/1")
-                        .header("Authorization", ADMIN_ROLE_VALUE))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-
-        //when
-        //then
-        mvc.perform(get("/person/employee/2/jobs"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[0].id").value(1))
-                .andExpect(jsonPath("$.[0].name").value("name1"))
-                .andExpect(jsonPath("$.[0].salary").value(2500))
-                .andExpect(jsonPath("$.[0].startDate").value("2020-01-01"))
-                .andExpect(jsonPath("$.[0].endDate").value("2021-01-01"))
-                .andExpect(jsonPath("$.[0].employeeId").value(2));
-    }
-
-    @Test
-    public void testAddEmployeeJobShouldThrowJobDatesOverlapException() throws Exception {
-        //given
-        Job job = Job.builder()
-                .name("job2")
-                .salary(1000L)
-                .startDate(LocalDate.of(2020, 2, 2))
-                .endDate(LocalDate.of(2021, 2, 2))
-                .build();
-        jobRepository.save(job);
-
-        personService.addEmployeeJob(2, 1);
-
-        //when
-        //then
-        mvc.perform(patch("/person/employee/2/job/2")
-                        .header("Authorization", ADMIN_ROLE_VALUE))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.statusCode").value(400))
-                .andExpect(jsonPath("$.message").value("Position dates overlap with existing positions"))
-                .andExpect(jsonPath("$.description").value("uri=/person/employee/2/job/2"))
-                .andReturn();
-    }
-
-    @Test
-    public void testAddEmployeeJobShouldThrowPersonIsNotEmployeeException() throws Exception {
-        mvc.perform(patch("/person/employee/1/job/1")
-                        .header("Authorization", ADMIN_ROLE_VALUE))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.statusCode").value(400))
-                .andExpect(jsonPath("$.message").value("Person with id 1 is not an Employee"))
-                .andExpect(jsonPath("$.description").value("uri=/person/employee/1/job/1"))
-                .andReturn();
-    }
-
-    @Test
-    public void testAddEmployeeJobShouldThrowJobAlreadyAssignedException() throws Exception {
-        personService.addEmployeeJob(2, 1);
-
-        mvc.perform(patch("/person/employee/2/job/1")
-                        .header("Authorization", ADMIN_ROLE_VALUE))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.statusCode").value(400))
-                .andExpect(jsonPath("$.message").value("This job is already assigned"))
-                .andExpect(jsonPath("$.description").value("uri=/person/employee/2/job/1"))
-                .andReturn();
-    }
-
-    @Test
-    public void testRemoveEmployeeJobShouldRemoveJob() throws Exception {
-        //given
-        personService.addEmployeeJob(2, 1);
-
-        //when
-        mvc.perform(patch("/person/employee/2/job/1/remove"))
-                .andDo(print())
-                .andExpect(status().isOk());
-
-        //then
-        mvc.perform(get("/person/employee/2/jobs"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", empty()));
-    }
-
-    @Test
-    public void testRemoveEmployeeJobShouldThrowException() throws Exception {
-        //given
-        //when
-        //then
-        mvc.perform(patch("/person/employee/2/job/1/remove"))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.statusCode").value(400))
-                .andExpect(jsonPath("$.message").value("Employee with id: 2 does not contain job with id: 1"))
-                .andExpect(jsonPath("$.description").value("uri=/person/employee/2/job/1/remove"));
     }
 
     @Test
     public void testDeletePersonShouldReturnNoContentStatus() throws Exception {
-        mvc.perform(delete("/person/1"))
+        mvc.perform(delete("/people/1"))
                 .andDo(print())
                 .andExpect(status().isNoContent());
     }
 
     @Test
     public void testDeleteEmployeeWithJobsShouldThrowEmployeeContainsJobException() throws Exception {
-        personService.addEmployeeJob(2, 1);
+        jobService.addEmployeeJob(2, 1);
 
-        mvc.perform(delete("/person/2"))
+        mvc.perform(delete("/people/2"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.statusCode").value(400))
                 .andExpect(jsonPath("$.message").value("Can't delete employee because he still contains jobs. Remove them first"))
-                .andExpect(jsonPath("$.description").value("uri=/person/2"));
+                .andExpect(jsonPath("$.description").value("uri=/people/2"));
+    }
+
+    @Test
+    public void testGetEmployeesWithJobsShouldFindEmployees() throws Exception {
+        //given
+        Employee employee = (Employee) personService.findById(2);
+        Job job = jobService.findById(1);
+
+        //when
+        jobService.addEmployeeJob(employee.getId(), job.getId());
+
+        //then
+        mvc.perform(get("/people/employees"))
+                .andDo(print())
+                .andExpect(jsonPath("$.[0].id").value(2))
+                .andExpect(jsonPath("$.[0].name").value("name2"))
+                .andExpect(jsonPath("$.[0].surname").value("surname2"))
+                .andExpect(jsonPath("$.[0].pesel").value(91863494108L))
+                .andExpect(jsonPath("$.[0].height").value(20))
+                .andExpect(jsonPath("$.[0].weight").value(20))
+                .andExpect(jsonPath("$.[0].email").value("email2@test.com"))
+                .andExpect(jsonPath("$.[0].employmentStartDate").value("2005-01-01"))
+                .andExpect(jsonPath("$.[0].position").value("position1"))
+                .andExpect(jsonPath("$.[0].salary").value(5000))
+                .andExpect(jsonPath("$.[0].jobs[0].id").value(1))
+                .andExpect(jsonPath("$.[0].jobs[0].name").value("name1"))
+                .andExpect(jsonPath("$.[0].jobs[0].salary").value(2500))
+                .andExpect(jsonPath("$.[0].jobs[0].startDate").value("2020-01-01"))
+                .andExpect(jsonPath("$.[0].jobs[0].endDate").value("2021-01-01"))
+                .andExpect(jsonPath("$.[0].jobs[0].employeeId").value(2));
     }
 }

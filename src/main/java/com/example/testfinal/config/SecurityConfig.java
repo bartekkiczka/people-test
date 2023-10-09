@@ -27,10 +27,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .requestMatchers(HttpMethod.POST, "/person").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/person/{id}").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/people").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/people/{id}").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/upload").hasAnyRole("ADMIN", "IMPORTER")
-                .requestMatchers(HttpMethod.POST, "/person/employee/{id}/job").hasAnyRole("ADMIN", "EMPLOYEE")
+                .requestMatchers(HttpMethod.POST, "jobs/{jobId}/employee/{employeeId}").hasAnyRole("ADMIN", "EMPLOYEE")
                 .and()
                 .httpBasic().and()
                 .csrf().disable();

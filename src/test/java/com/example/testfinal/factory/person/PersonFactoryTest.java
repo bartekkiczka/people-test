@@ -1,6 +1,5 @@
 package com.example.testfinal.factory.person;
 
-import com.example.testfinal.enums.PersonTypes;
 import com.example.testfinal.model.Employee;
 import com.example.testfinal.model.Pensioner;
 import com.example.testfinal.model.Person;
@@ -41,14 +40,14 @@ class PersonFactoryTest {
         params.put("yearsWorked", 30);
 
         CreatePersonCommand createPersonCommand = CreatePersonCommand.builder()
-                .type(PersonTypes.PENSIONER.toString())
+                .type("PENSIONER")
                 .parameters(params)
                 .build();
 
         Person person = personFactory.create(createPersonCommand);
         Pensioner pensioner = modelMapper.map(person, Pensioner.class);
 
-        assertEquals(pensioner.getType(), PersonTypes.PENSIONER);
+        assertEquals(pensioner.getType(), "PENSIONER");
         assertEquals(pensioner.getName(), "name");
         assertEquals(pensioner.getSurname(), "surname");
         assertEquals(pensioner.getPesel(), 44556677889L);
@@ -73,14 +72,14 @@ class PersonFactoryTest {
         params.put("salary", 100);
 
         CreatePersonCommand createPersonCommand = CreatePersonCommand.builder()
-                .type(PersonTypes.EMPLOYEE.toString())
+                .type("EMPLOYEE")
                 .parameters(params)
                 .build();
 
         Person person = personFactory.create(createPersonCommand);
         Employee employee = modelMapper.map(person, Employee.class);
 
-        assertEquals(employee.getType(), PersonTypes.EMPLOYEE);
+        assertEquals(employee.getType(), "EMPLOYEE");
         assertEquals(employee.getName(), "name");
         assertEquals(employee.getSurname(), "surname");
         assertEquals(employee.getPesel(), 44556677889L);
@@ -108,14 +107,14 @@ class PersonFactoryTest {
         params.put("scholarship", 300);
 
         CreatePersonCommand createPersonCommand = CreatePersonCommand.builder()
-                .type(PersonTypes.STUDENT.toString())
+                .type("STUDENT")
                 .parameters(params)
                 .build();
 
         Person person = personFactory.create(createPersonCommand);
         Student student = modelMapper.map(person, Student.class);
 
-        assertEquals(student.getType(), PersonTypes.STUDENT);
+        assertEquals(student.getType(), "STUDENT");
         assertEquals(student.getName(), "name");
         assertEquals(student.getSurname(), "surname");
         assertEquals(student.getPesel(), 44556677889L);

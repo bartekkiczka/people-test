@@ -1,6 +1,5 @@
 package com.example.testfinal.model.dto;
 
-import com.example.testfinal.enums.PersonTypes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +13,7 @@ public abstract class PersonDto {
 
     private long id;
 
-    private PersonTypes type;
+    private String type;
 
     private String name;
 

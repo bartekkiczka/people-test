@@ -20,8 +20,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,8 +47,6 @@ public class ImportService {
 
     @Async("importPeopleExecutor")
     public void uploadFile(File file, Integer timeout) {
-        Instant start = Instant.now();
-
         long currentProcessedRows = 0;
         ImportStatus currentImportStatus = ImportStatus.builder()
                 .timeout(timeout)
@@ -147,12 +143,6 @@ public class ImportService {
             file.delete();
         }
         updateImportStatusEnd(currentProcessedRows, currentImportStatus, UploadStatus.COMPLETED);
-
-        Instant end = Instant.now();
-        Duration duration = Duration.between(start, end);
-        long seconds = duration.getSeconds();
-        long milliseconds = duration.toMillis() % 1000;
-        System.out.println("Import completed in " + seconds + " seconds and " + milliseconds + " milliseconds.");
     }
 
     private void updateImportStatusEnd(long currentProcessedRows, ImportStatus importStatus, UploadStatus Status) {

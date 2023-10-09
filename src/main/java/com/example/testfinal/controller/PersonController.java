@@ -3,11 +3,8 @@ package com.example.testfinal.controller;
 import com.example.testfinal.model.Person;
 import com.example.testfinal.model.command.create.CreatePersonCommand;
 import com.example.testfinal.model.command.edit.EditPersonCommand;
-import com.example.testfinal.model.dto.EmployeeDto;
 import com.example.testfinal.model.dto.EmployeeWithJobsDto;
-import com.example.testfinal.model.dto.JobDto;
 import com.example.testfinal.model.dto.PersonDto;
-import com.example.testfinal.repository.PersonRepository;
 import com.example.testfinal.requests.SearchRequest;
 import com.example.testfinal.service.PersonService;
 import lombok.RequiredArgsConstructor;
@@ -23,22 +20,21 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/person")
+@RequestMapping("/people")
 public class PersonController {
 
     private final PersonService personService;
-    private final PersonRepository personRepository;
     private final ModelMapper modelMapper;
 
     @GetMapping
-    public ResponseEntity<List<PersonDto>> getPersons(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+    public ResponseEntity<List<PersonDto>> getPeople(@PageableDefault(size = 10, page = 0) Pageable pageable) {
         return new ResponseEntity<>(personService.findAll(pageable).stream()
                 .map(person -> modelMapper.map(person, PersonDto.class))
                 .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     @GetMapping("/employees")
-    public ResponseEntity<List<EmployeeWithJobsDto>> getEmployeesWithJobs(){
+    public ResponseEntity<List<EmployeeWithJobsDto>> getEmployeesWithJobs() {
         return new ResponseEntity<>(personService.findAllEmployeesWithJobs().stream()
                 .map(employee -> modelMapper.map(employee, EmployeeWithJobsDto.class)).collect(Collectors.toList()), HttpStatus.OK);
     }
@@ -78,23 +74,5 @@ public class PersonController {
     public ResponseEntity<Void> delete(@PathVariable long id) {
         personService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-    @GetMapping("/employee/{id}/jobs")
-    public ResponseEntity<List<JobDto>> findEmployeeJobs(@PathVariable long id){
-        List<JobDto> jobDtos = personService.getEmployeeJobs(id).stream()
-                .map(job -> modelMapper.map(job, JobDto.class)).collect(Collectors.toList());
-        return new ResponseEntity<>(jobDtos, HttpStatus.OK);
-    }
-
-    @PatchMapping("/employee/{employeeId}/job/{jobId}")
-    public ResponseEntity<Void> addEmployeeJob(@PathVariable long employeeId, @PathVariable long jobId) {
-        personService.addEmployeeJob(employeeId, jobId);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @PatchMapping("/employee/{employeeId}/job/{jobId}/remove")
-    public ResponseEntity<Void> removeEmployeeJob(@PathVariable long employeeId, @PathVariable long jobId) {
-        personService.removeEmployeeJob(employeeId, jobId);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

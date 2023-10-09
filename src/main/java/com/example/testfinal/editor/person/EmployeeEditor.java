@@ -1,6 +1,5 @@
 package com.example.testfinal.editor.person;
 
-import com.example.testfinal.enums.PersonTypes;
 import com.example.testfinal.model.Employee;
 import com.example.testfinal.model.Person;
 import com.example.testfinal.model.command.edit.EditPersonCommand;
@@ -13,15 +12,15 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class EmployeeEditor implements PersonEditor {
+public class EmployeeEditor implements PersonEditor<Employee> {
 
     @Override
     public String getType() {
-        return PersonTypes.EMPLOYEE.toString();
+        return "EMPLOYEE";
     }
 
     @Override
-    public Person edit(Person person, EditPersonCommand command) {
+    public Employee edit(Employee employee, EditPersonCommand command) {
         Map<String, Object> parameters = command.getParameters();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         String name = getStringParameters("name", parameters);
@@ -35,7 +34,6 @@ public class EmployeeEditor implements PersonEditor {
         String positions = getStringParameters("position", parameters);
         int salary = getIntegerParameters("salary", parameters);
 
-        Employee employee = (Employee) person;
         employee.setName(name);
         employee.setSurname(surname);
         employee.setPesel(pesel);

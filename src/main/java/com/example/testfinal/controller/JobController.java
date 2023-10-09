@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/job")
+@RequestMapping("/jobs")
 public class JobController {
 
     private final JobService jobService;
@@ -45,5 +45,24 @@ public class JobController {
     public ResponseEntity<Void> delete(@PathVariable long id) {
         jobService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/employee/{id}/jobs")
+    public ResponseEntity<List<JobDto>> findEmployeeJobs(@PathVariable long id){
+        List<JobDto> jobDtos = jobService.getEmployeeJobs(id).stream()
+                .map(job -> modelMapper.map(job, JobDto.class)).collect(Collectors.toList());
+        return new ResponseEntity<>(jobDtos, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{jobId}/employee/{employeeId}")
+    public ResponseEntity<Void> addEmployeeJob(@PathVariable long jobId, @PathVariable long employeeId) {
+        jobService.addEmployeeJob(employeeId, jobId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PatchMapping("/{jobId}/employee/{employeeId}/remove")
+    public ResponseEntity<Void> removeEmployeeJob(@PathVariable long jobId, @PathVariable long employeeId) {
+        jobService.removeEmployeeJob(employeeId, jobId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

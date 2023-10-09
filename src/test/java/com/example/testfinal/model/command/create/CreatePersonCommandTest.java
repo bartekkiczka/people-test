@@ -1,10 +1,8 @@
 package com.example.testfinal.model.command.create;
 
-import com.example.testfinal.enums.PersonTypes;
 import com.example.testfinal.model.Employee;
 import com.example.testfinal.model.Pensioner;
 import com.example.testfinal.model.Student;
-import com.example.testfinal.model.command.create.CreatePersonCommand;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +35,7 @@ class CreatePersonCommandTest {
         params.put("yearsWorked", 30);
 
         CreatePersonCommand createPersonCommand = CreatePersonCommand.builder()
-                .type(PersonTypes.PENSIONER.toString())
+                .type("PENSIONER")
                 .parameters(params)
                 .build();
 
@@ -61,7 +59,7 @@ class CreatePersonCommandTest {
         params.put("scholarship", 200);
 
         CreatePersonCommand createPersonCommand = CreatePersonCommand.builder()
-                .type(PersonTypes.STUDENT.toString())
+                .type("STUDENT")
                 .parameters(params)
                 .build();
 
@@ -84,7 +82,7 @@ class CreatePersonCommandTest {
         params.put("salary", 3000);
 
         CreatePersonCommand createPersonCommand = CreatePersonCommand.builder()
-                .type(PersonTypes.EMPLOYEE.toString())
+                .type("EMPLOYEE")
                 .parameters(params)
                 .build();
 

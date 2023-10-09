@@ -10,15 +10,15 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PersonEditorHandler {
+public class PersonEditorHandler<T extends Person> {
 
-    private final Map<String, PersonEditor> visitors;
+    private final Map<String, PersonEditor<T>> editors;
 
-    public PersonEditorHandler(Set<PersonEditor> visitors) {
-        this.visitors = visitors.stream().collect(Collectors.toMap(PersonEditor::getType, Function.identity()));
+    public PersonEditorHandler(Set<PersonEditor<T>> visitors) {
+        this.editors = visitors.stream().collect(Collectors.toMap(PersonEditor::getType, Function.identity()));
     }
 
-    public Person edit(Person person, EditPersonCommand command) {
-        return visitors.get(person.getType().toString()).edit(person, command);
+    public T edit(T person, EditPersonCommand command) {
+        return editors.get(person.getType()).edit(person, command);
     }
 }

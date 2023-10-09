@@ -1,6 +1,5 @@
 package com.example.testfinal.queryBuilder.search.mappers;
 
-import com.example.testfinal.enums.PersonTypes;
 import com.example.testfinal.model.Employee;
 import com.example.testfinal.model.Person;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,7 @@ import java.time.LocalDate;
 public class EmployeeMapper implements PersonMapper{
     @Override
     public String getType() {
-        return PersonTypes.EMPLOYEE.toString();
+        return "EMPLOYEE";
     }
 
     @Override

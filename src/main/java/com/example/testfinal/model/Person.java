@@ -1,6 +1,5 @@
 package com.example.testfinal.model;
 
-import com.example.testfinal.enums.PersonTypes;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,9 +25,8 @@ public abstract class Person {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Enumerated(EnumType.STRING)
     @Column(insertable = false, updatable = false, name = "person_type")
-    private PersonTypes type;
+    private String type;
 
     private String name;
 

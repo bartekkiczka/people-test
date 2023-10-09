@@ -1,10 +1,6 @@
 package com.example.testfinal.service;
 
 import com.example.testfinal.DatabaseCleaner;
-import com.example.testfinal.enums.PersonTypes;
-import com.example.testfinal.exceptions.impl.job.JobAlreadyAssignedException;
-import com.example.testfinal.exceptions.impl.job.JobDatesOverlapException;
-import com.example.testfinal.exceptions.impl.job.JobNotFoundException;
 import com.example.testfinal.exceptions.impl.person.*;
 import com.example.testfinal.exceptions.impl.validation.ParameterNotExistsException;
 import com.example.testfinal.model.*;
@@ -28,7 +24,6 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,6 +39,9 @@ class PersonServiceTest {
 
     @Autowired
     private JobRepository jobRepository;
+
+    @Autowired
+    private JobService jobService;
 
     @Autowired
     private DatabaseCleaner databaseCleaner;
@@ -83,7 +81,7 @@ class PersonServiceTest {
 
         //then
         assertEquals(savedPensioner.getId(), 4);
-        assertEquals(savedPensioner.getType(), PersonTypes.PENSIONER);
+        assertEquals(savedPensioner.getType(), "PENSIONER");
         assertEquals(savedPensioner.getName(), "pensioner");
         assertEquals(savedPensioner.getSurname(), "surname");
         assertEquals(savedPensioner.getPesel(), 12345672905L);
@@ -191,7 +189,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
 
-        List<Person> result = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> result = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         assertEquals(1, result.size());
     }
@@ -205,8 +203,7 @@ class PersonServiceTest {
                 .parameters(new HashMap<>(params))
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)
-        );
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -221,7 +218,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -236,7 +233,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -252,7 +249,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(2, resultPage.size());
@@ -268,7 +265,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(2, resultPage.size());
@@ -283,7 +280,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -299,7 +296,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -314,7 +311,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -330,7 +327,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -345,7 +342,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -361,7 +358,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -376,7 +373,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -392,7 +389,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -408,7 +405,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -424,7 +421,7 @@ class PersonServiceTest {
                 .parameters(params)
                 .build();
         //When
-        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10));
+        List<Person> resultPage = personService.search(searchRequest, PageRequest.of(0, 10)).getContent();
 
         //Then
         assertEquals(1, resultPage.size());
@@ -582,143 +579,6 @@ class PersonServiceTest {
     }
 
     @Test
-    @Transactional
-    public void testAddEmployeeJobShouldAddJob() {
-        //given
-        Employee employee = (Employee) personService.findById(2);
-        Job job = jobRepository.findById(1L).orElseThrow(() -> new JobNotFoundException(1));
-        assertEquals(personService.getEmployeeJobs(employee.getId()).size(), 0);
-
-        //when
-        personService.addEmployeeJob(employee.getId(), job.getId());
-
-        Employee updatedEmployee = (Employee) personService.findById(employee.getId());
-        List<Job> employeeJobs = updatedEmployee.getJobs();
-
-        //then
-        assertTrue(employeeJobs.stream().anyMatch(j -> j.getId().equals(job.getId())));
-    }
-
-    @Test
-    @Transactional
-    public void testAddEmployeeJobShouldThrowJobDatesOverlapException() {
-        //given
-        Employee employee = Employee.builder()
-                .name("name")
-                .surname("surname")
-                .pesel(66553315782L)
-                .height(60)
-                .weight(40)
-                .email("employee@mail.com")
-                .employmentStartDate(LocalDate.of(2021, 2, 2))
-                .position("position")
-                .salary(200)
-                .build();
-        personRepository.save(employee);
-
-        Job job = Job.builder()
-                .name("job")
-                .salary(5000L)
-                .startDate(LocalDate.of(2020, 1, 1))
-                .endDate(LocalDate.of(2021, 1, 1))
-                .build();
-        jobRepository.save(job);
-
-        Job overlappingJob = Job.builder()
-                .name("overlapping job")
-                .salary(5000L)
-                .startDate(LocalDate.of(2020, 5, 1))
-                .endDate(LocalDate.of(2021, 5, 1))
-                .build();
-        jobRepository.save(overlappingJob);
-
-        assertEquals(personService.getEmployeeJobs(employee.getId()).size(), 0);
-
-        //when
-        personService.addEmployeeJob(employee.getId(), job.getId());
-
-        //then
-        assertThrows(JobDatesOverlapException.class, () -> personService.addEmployeeJob(employee.getId(), overlappingJob.getId()));
-    }
-
-    @Test
-    @Transactional
-    public void testConcurrentAddJobShouldThrowJobAlreadyAssignedException() {
-        //given
-        assertEquals(personService.getEmployeeJobs(2).size(), 0);
-
-        //when
-        personService.addEmployeeJob(2, 1);
-
-        //then
-        assertThrows(JobAlreadyAssignedException.class, () -> personService.addEmployeeJob(2, 1));
-    }
-
-    @Test
-    public void testAddJobShouldThrowExceptionIfPersonIsNotEmployee() {
-        assertThrows(PersonIsNotEmployeeException.class, () -> personService.addEmployeeJob(1, 1));
-    }
-
-    @Test
-    @Transactional
-    public void testRemoveEmployeeJobShouldRemoveJob() {
-        //given
-        assertEquals(personService.getEmployeeJobs(2).size(), 0);
-        personService.addEmployeeJob(2, 1);
-        Job job = jobRepository.findById(1L).orElseThrow(() -> new JobNotFoundException(1));
-        Employee employee = (Employee) personService.findById(2);
-        assertEquals(job.getEmployee().getId(), 2);
-        assertTrue(employee.getJobs().stream().anyMatch(employeeJob -> Objects.equals(employeeJob.getId(), job.getId())));
-
-        //when
-        personService.removeEmployeeJob(2, 1);
-
-        //then
-        assertNull(job.getEmployee());
-        assertFalse(employee.getJobs().stream().anyMatch(employeeJob -> Objects.equals(employeeJob.getId(), job.getId())));
-    }
-
-    @Test
-    @Transactional
-    public void testGetEmployeeJobsShouldReturnJobs(){
-        //given
-        personService.addEmployeeJob(2,1);
-
-        //when
-        List<Job> employeeJobs = personService.getEmployeeJobs(2);
-
-        //then
-        assertEquals(employeeJobs.size(), 1);
-    }
-
-    @Test
-    public void testGetEmployeeJobsShouldThrowPersonIsNotEmployeeException(){
-        assertThrows(PersonIsNotEmployeeException.class, () -> personService.getEmployeeJobs(1));
-    }
-
-    @Test
-    public void testGetEmployeeJobsShouldThrowPersonNotFoundException(){
-        assertThrows(PersonNotFoundException.class, () -> personService.getEmployeeJobs(999));
-    }
-
-    @Test
-    @Transactional
-    public void testRemoveEmployeeJobShouldThrowEmployeeDoesNotContainJobException() {
-        //given
-        Employee employee = (Employee) personService.findById(2);
-        assertFalse(employee.getJobs().stream().anyMatch(employeeJob -> employeeJob.getId() == 1));
-
-        //when
-        //then
-        assertThrows(EmployeeDoesNotContainJobException.class, () -> personService.removeEmployeeJob(2, 1));
-    }
-
-    @Test
-    public void testRemoveEmployeeJobShouldThrowPersonIsNotEmployeeException(){
-        assertThrows(PersonIsNotEmployeeException.class, () -> personService.removeEmployeeJob(1, 1));
-    }
-
-    @Test
     public void testDeleteShouldDeletePerson() {
         //given
         assertEquals(3, personService.findAll(PageRequest.of(0, 10)).getContent().size());
@@ -745,9 +605,9 @@ class PersonServiceTest {
     @Test
     @Transactional
     public void testDeleteShouldThrowEmployeeContainsJobsException(){
-        assertEquals(personService.getEmployeeJobs(2).size(), 0);
+        assertEquals(jobService.getEmployeeJobs(2).size(), 0);
 
-        personService.addEmployeeJob(2,1);
+        jobService.addEmployeeJob(2,1);
 
         assertThrows(EmployeeContainsJobsException.class, () -> personService.deleteById(2));
     }

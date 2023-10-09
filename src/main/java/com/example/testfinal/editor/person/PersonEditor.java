@@ -5,11 +5,11 @@ import com.example.testfinal.model.command.edit.EditPersonCommand;
 
 import java.util.Map;
 
-public interface PersonEditor {
+public interface PersonEditor<T extends Person> {
 
     String getType();
 
-    Person edit(Person person, EditPersonCommand command);
+    T edit(T person, EditPersonCommand command);
 
     default String getStringParameters(String name, Map<String, Object> parameters) {
         return (String) parameters.get(name);

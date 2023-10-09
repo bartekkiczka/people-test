@@ -1,6 +1,5 @@
 package com.example.testfinal.model;
 
-import com.example.testfinal.enums.PersonTypes;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -19,7 +18,7 @@ public class Pensioner extends Person {
     @Builder
     public Pensioner(String name, String surname, long pesel, Integer height, Integer weight,
                      String email, Integer pension, Integer yearsWorked) {
-        this.setType(PersonTypes.PENSIONER);
+        this.setType("PENSIONER");
         this.setName(name);
         this.setSurname(surname);
         this.setPesel(pesel);

@@ -1,6 +1,5 @@
 package com.example.testfinal.model;
 
-import com.example.testfinal.enums.PersonTypes;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
@@ -21,7 +20,7 @@ public class Employee extends Person {
     @Builder
     public Employee(String name, String surname, long pesel, Integer height, Integer weight,
                     String email, LocalDate employmentStartDate, String position, Integer salary){
-        this.setType(PersonTypes.EMPLOYEE);
+        this.setType("EMPLOYEE");
         this.setName(name);
         this.setSurname(surname);
         this.setPesel(pesel);

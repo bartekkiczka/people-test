@@ -1,8 +1,6 @@
 package com.example.testfinal.model.command.create;
 
-import com.example.testfinal.enums.PersonTypes;
 import com.example.testfinal.model.Employee;
-import com.example.testfinal.model.command.create.CreateEmployeeCommand;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +22,7 @@ class CreateEmployeeCommandTest {
     public void testCreateEmployeeCommandToEmployeeConversion(){
         //given
         CreateEmployeeCommand command = CreateEmployeeCommand.builder()
-                .type(PersonTypes.EMPLOYEE)
+                .type("EMPLOYEE")
                 .name("name")
                 .surname("surname")
                 .pesel(11223344556L)
@@ -40,7 +38,7 @@ class CreateEmployeeCommandTest {
         Employee employee = modelMapper.map(command, Employee.class);
 
         //then
-        assertEquals(employee.getType(), PersonTypes.EMPLOYEE);
+        assertEquals(employee.getType(), "EMPLOYEE");
         assertEquals(employee.getName(), "name");
         assertEquals(employee.getSurname(), "surname");
         assertEquals(employee.getPesel(), 11223344556L);

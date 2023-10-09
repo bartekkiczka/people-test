@@ -1,6 +1,5 @@
 package com.example.testfinal.queryBuilder.search.mappers;
 
-import com.example.testfinal.enums.PersonTypes;
 import com.example.testfinal.model.Pensioner;
 import com.example.testfinal.model.Person;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,7 @@ import java.sql.ResultSet;
 public class PensionerMapper implements PersonMapper {
     @Override
     public String getType() {
-        return PersonTypes.PENSIONER.toString();
+        return "PENSIONER";
     }
 
     @Override

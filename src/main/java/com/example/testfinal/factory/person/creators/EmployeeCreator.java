@@ -1,7 +1,6 @@
 package com.example.testfinal.factory.person.creators;
 
 import com.example.testfinal.config.FieldsValidator;
-import com.example.testfinal.enums.PersonTypes;
 import com.example.testfinal.factory.person.PersonCreator;
 import com.example.testfinal.model.Employee;
 import com.example.testfinal.model.Person;
@@ -23,12 +22,12 @@ public class EmployeeCreator implements PersonCreator {
 
     @Override
     public String getType() {
-        return PersonTypes.EMPLOYEE.toString();
+        return "EMPLOYEE";
     }
 
     @Override
     public Person create(Map<String, Object> parameters) {
-        PersonTypes type = PersonTypes.EMPLOYEE;
+        String type = "EMPLOYEE";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         String name = getStringParameters("name", parameters);
         String surname = getStringParameters("surname", parameters);

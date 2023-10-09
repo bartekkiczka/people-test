@@ -1,6 +1,5 @@
 package com.example.testfinal.model.command.create;
 
-import com.example.testfinal.enums.PersonTypes;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
@@ -16,9 +15,8 @@ import java.time.LocalDate;
 @Builder
 public class CreateEmployeeCommand {
 
-    @Enumerated(EnumType.STRING)
     @NotNull(message = "TYPE_IS_NULL")
-    private PersonTypes type;
+    private String type;
 
     @NotNull(message = "NAME_IS_NULL")
     @NotEmpty(message = "NAME_IS_EMPTY")

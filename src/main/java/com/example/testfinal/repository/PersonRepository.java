@@ -18,7 +18,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     @NotNull Page<Person> findAll(@NotNull Pageable pageable);
 
-    @Query("SELECT p FROM Person p LEFT JOIN FETCH p.jobs j WHERE p.type = EMPLOYEE")
+    @Query("SELECT p FROM Person p LEFT JOIN FETCH p.jobs j WHERE p.type = 'EMPLOYEE'")
     List<Employee> findAllEmployeesWithJobs();
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
