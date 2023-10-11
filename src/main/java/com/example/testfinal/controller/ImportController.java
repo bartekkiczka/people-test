@@ -4,6 +4,7 @@ import com.example.testfinal.enums.UploadStatus;
 import com.example.testfinal.exceptions.impl.upload.ImportStatusNotFoundException;
 import com.example.testfinal.model.ImportQueueItem;
 import com.example.testfinal.model.ImportStatus;
+import com.example.testfinal.model.command.create.CreateImportStatusCommand;
 import com.example.testfinal.model.dto.ImportStatusDto;
 import com.example.testfinal.responses.ImportResponse;
 import com.example.testfinal.service.ImportService;
@@ -46,13 +47,21 @@ public class ImportController {
 
     @PostMapping
     public ResponseEntity<ImportResponse> uploadFile(@RequestParam("file") MultipartFile file) throws Exception {
-        ImportResponse response = ImportResponse.builder()
-                .message("Import started")
+        CreateImportStatusCommand command = CreateImportStatusCommand.builder()
+                .status(UploadStatus.QUEUED)
                 .build();
 
-        importService.getLastImportStatus().ifPresent(importStatus -> {
-            if (importStatus.getStatus() == UploadStatus.STARTED) {
-                response.setMessage("Another import is currently Running. Your request has been added to the queue");
+        ImportStatus importStatus = importService.save(command);
+
+        ImportResponse response = ImportResponse.builder()
+                .message("Import started")
+                .importStatusId(importStatus.getId())
+                .build();
+
+        importService.getLastImportStatus().ifPresent(lastStatus -> {
+            if (lastStatus.getStatus() == UploadStatus.STARTED) {
+                response.setMessage("Another import is currently Running. Your request with id "
+                        + importStatus.getId() + " has been added to the queue");
             }
         });
 
@@ -64,7 +73,7 @@ public class ImportController {
             e.printStackTrace();
         }
 
-        ImportQueueItem item = new ImportQueueItem(tempFile);
+        ImportQueueItem item = new ImportQueueItem(tempFile, importStatus.getId());
         String importQueueJson = objectMapper.writeValueAsString(item);
         rabbitTemplate.convertAndSend(importQueue, importQueueJson);
 
@@ -75,5 +84,11 @@ public class ImportController {
     public ResponseEntity<ImportStatusDto> getImportStatus() {
         ImportStatus status = importService.getLastImportStatus().orElseThrow(ImportStatusNotFoundException::new);
         return new ResponseEntity<>(modelMapper.map(status, ImportStatusDto.class), HttpStatus.OK);
+    }
+
+    @GetMapping("/status/{id}")
+    public ResponseEntity<ImportStatusDto> findById(@PathVariable long id) {
+        ImportStatus importStatus = importService.findById(id);
+        return new ResponseEntity<>(modelMapper.map(importStatus, ImportStatusDto.class), HttpStatus.OK);
     }
 }

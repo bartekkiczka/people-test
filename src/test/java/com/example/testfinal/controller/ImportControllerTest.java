@@ -53,7 +53,9 @@ class ImportControllerTest {
     public void testFindAllShouldFindAllImportStatuses() throws Exception {
         //given
         ImportStatus importStatus = ImportStatus.builder()
-                .status(UploadStatus.STARTED)
+                .status(UploadStatus.QUEUED)
+                .createdDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now())
                 .processedRows(100L)
                 .build();
 
@@ -65,7 +67,7 @@ class ImportControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id").value(1))
-                .andExpect(jsonPath("$.[0].startDate").isNotEmpty())
+                .andExpect(jsonPath("$.[0].createdDate").isNotEmpty())
                 .andExpect(jsonPath("$.[0].endDate").isNotEmpty())
                 .andExpect(jsonPath("$.[0].processedRows").value(100L));
     }
@@ -95,7 +97,7 @@ class ImportControllerTest {
         //when
         ImportStatus importStatus = ImportStatus.builder()
                 .status(UploadStatus.STARTED)
-                .startDate(LocalDateTime.now())
+                .createdDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now())
                 .processedRows(100L)
                 .build();
@@ -104,10 +106,9 @@ class ImportControllerTest {
         //then
         mvc.perform(MockMvcRequestBuilders.multipart("/upload")
                         .file(file)
-                        .param("timeout", "10")
                         .header(HttpHeaders.AUTHORIZATION, ADMIN_ROLE_VALUE))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Another import is currently Running. Your request has been added to the queue"));
+                .andExpect(jsonPath("$.message").value("Another import is currently Running. Your request with id 2 has been added to the queue"));
     }
 
     @Test
@@ -140,7 +141,7 @@ class ImportControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value(status.getStatus().toString()))
-                .andExpect(jsonPath("$.startDate").isNotEmpty())
+                .andExpect(jsonPath("$.createdDate").isNotEmpty())
                 .andExpect(jsonPath("$.endDate").isNotEmpty())
                 .andExpect(jsonPath("$.processedRows").value(status.getProcessedRows()));
     }

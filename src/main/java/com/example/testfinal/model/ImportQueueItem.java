@@ -11,4 +11,5 @@ import java.io.File;
 @Builder
 public class ImportQueueItem {
     private File file;
+    private Long statusId;
 }

@@ -11,4 +11,5 @@ import lombok.Setter;
 @Setter
 public class ImportResponse {
     String message;
+    Long importStatusId;
 }

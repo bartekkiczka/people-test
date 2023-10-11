@@ -16,6 +16,8 @@ public class ImportStatusDto {
 
     private UploadStatus status;
 
+    private LocalDateTime createdDate;
+
     private LocalDateTime startDate;
 
     private LocalDateTime endDate;

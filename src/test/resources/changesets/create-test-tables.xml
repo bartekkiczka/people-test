@@ -52,12 +52,13 @@
         </createTable>
     </changeSet>
 
-    <changeSet author="Bartek" id="02092023-9">
+    <changeSet author="Bartek" id="02092023-11">
         <createTable tableName="import_status">
             <column autoIncrement="true" name="id" type="BIGINT">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="status" type="VARCHAR(255)"/>
+            <column name="created_date" type="DATETIME"/>
             <column name="start_date" type="DATETIME"/>
             <column name="end_date" type="DATETIME"/>
             <column name="processed_rows" type="BIGINT"/>

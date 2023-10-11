@@ -16,6 +16,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.*;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -52,8 +53,16 @@ class ImportServiceTest {
 
         assertEquals(3, personRepository.findAll(PageRequest.of(0, 10)).getContent().size());
 
+        ImportStatus importStatus = ImportStatus.builder()
+                .status(UploadStatus.QUEUED)
+                .createdDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now())
+                .processedRows(null)
+                .build();
+        importStatusRepository.save(importStatus);
+
         //when
-        importService.uploadFile(tempFile);
+        importService.uploadFile(tempFile, 1);
         Thread.sleep(500);
 
         //then
@@ -71,7 +80,7 @@ class ImportServiceTest {
         assertEquals(3, personRepository.findAll(PageRequest.of(0, 10)).getContent().size());
 
         //when
-        importService.uploadFile(tempFile);
+        importService.uploadFile(tempFile, 1);
         Thread.sleep(500);
 
         //then
@@ -86,14 +95,21 @@ class ImportServiceTest {
                 new FileInputStream(csvFile));
         File tempFile = createTempFile(file);
 
+        ImportStatus importStatus = ImportStatus.builder()
+                .status(UploadStatus.QUEUED)
+                .createdDate(LocalDateTime.now())
+                .endDate(LocalDateTime.now())
+                .processedRows(null)
+                .build();
+        importStatusRepository.save(importStatus);
 
-        importService.uploadFile(tempFile);
+        importService.uploadFile(tempFile, 1);
         Thread.sleep(500);
 
-        ImportStatus currentImportStatus = importStatusRepository.findTopByOrderByIdDesc().orElseThrow(ImportStatusNotFoundException::new);
+        ImportStatus currentImportStatus = importService.findById(1);
 
         assertEquals(currentImportStatus.getStatus(), UploadStatus.COMPLETED);
-        assertNotNull(currentImportStatus.getStartDate());
+        assertNotNull(currentImportStatus.getCreatedDate());
         assertNotNull(currentImportStatus.getEndDate());
     }
 

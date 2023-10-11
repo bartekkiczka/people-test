@@ -29,8 +29,11 @@ public class ImportStatus {
     @Enumerated(EnumType.STRING)
     private UploadStatus status;
 
-    @Column(name = "start_date", updatable = false)
+    @Column(name = "created_date", updatable = false)
     @CreatedDate
+    private LocalDateTime createdDate;
+
+    @Column(name = "start_date")
     private LocalDateTime startDate;
 
     @Column(name = "end_date")

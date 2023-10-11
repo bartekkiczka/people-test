@@ -19,7 +19,7 @@ public class ImportQueueService {
     public void processImport(String importQueueJson) {
         try {
             ImportQueueItem item = objectMapper.readValue(importQueueJson, ImportQueueItem.class);
-            importService.uploadFile(item.getFile());
+            importService.uploadFile(item.getFile(), item.getStatusId());
         } catch (IOException e) {
             e.printStackTrace();
         }

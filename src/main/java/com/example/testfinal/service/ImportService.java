@@ -1,14 +1,17 @@
 package com.example.testfinal.service;
 
 import com.example.testfinal.enums.UploadStatus;
+import com.example.testfinal.exceptions.impl.upload.ImportStatusNotFoundException;
 import com.example.testfinal.factory.person.PersonFactory;
 import com.example.testfinal.model.ImportStatus;
+import com.example.testfinal.model.command.create.CreateImportStatusCommand;
 import com.example.testfinal.model.command.create.CreatePersonCommand;
 import com.example.testfinal.repository.ImportStatusRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,7 +24,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -39,20 +44,33 @@ public class ImportService {
     private final ImportStatusService importStatusService;
     private final JdbcTemplate jdbcTemplate;
     private final PersonFactory personFactory;
+    private final ModelMapper modelMapper;
+    private final Clock clock;
 
     public Page<ImportStatus> findAll(Pageable pageable) {
         return importStatusRepository.findAll(pageable);
     }
 
     public Optional<ImportStatus> getLastImportStatus() {
-        return importStatusRepository.findTopByOrderByIdDesc();
+        return importStatusRepository.findTopOrderByIdDescWithNoQueuedStatus();
+    }
+
+    public ImportStatus save(CreateImportStatusCommand command){
+        return importStatusRepository.save(modelMapper.map(command, ImportStatus.class));
+    }
+
+    public ImportStatus findById(long id){
+        return importStatusRepository.findById(id).orElseThrow(ImportStatusNotFoundException::new);
     }
 
     @Async("importPeopleExecutor")
     @Transactional
-    public void uploadFile(File file) {
+    public void uploadFile(File file, long importStatusId) {
         long currentProcessedRows = 0;
-        ImportStatus currentImportStatus = importStatusService.initCurrentImportStatus();
+        ImportStatus currentImportStatus = importStatusRepository.findById(importStatusId)
+                .orElseThrow(ImportStatusNotFoundException::new);
+        currentImportStatus.setStatus(UploadStatus.STARTED);
+        currentImportStatus.setStartDate(LocalDateTime.now(clock));
 
         int batchSize = 100;
         List<Object[]> batchData = new ArrayList<>();

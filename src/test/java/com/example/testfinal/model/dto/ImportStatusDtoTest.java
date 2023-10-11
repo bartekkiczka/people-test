@@ -25,7 +25,7 @@ class ImportStatusDtoTest {
     public void testImportStatusToImportStatusDtoConversion(){
         ImportStatus importStatus = ImportStatus.builder()
                 .status(UploadStatus.COMPLETED)
-                .startDate(LocalDateTime.now())
+                .createdDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now())
                 .processedRows(1000L)
                 .build();
@@ -33,7 +33,7 @@ class ImportStatusDtoTest {
         ImportStatusDto importStatusDto = modelMapper.map(importStatus, ImportStatusDto.class);
 
         assertEquals(importStatusDto.getStatus(), importStatus.getStatus());
-        assertEquals(importStatusDto.getStartDate(), importStatus.getStartDate());
+        assertEquals(importStatusDto.getCreatedDate(), importStatus.getCreatedDate());
         assertEquals(importStatusDto.getEndDate(), importStatus.getEndDate());
         assertEquals(importStatusDto.getProcessedRows(), importStatus.getProcessedRows());
     }

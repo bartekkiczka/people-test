@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Clock;
+import java.time.ZoneId;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -51,6 +52,7 @@ public class ApplicationConfig {
 
     @Bean
     Clock clock(){
-        return Clock.systemUTC();
+        ZoneId zoneId = ZoneId.of("UTC+2");
+        return Clock.system(zoneId);
     }
 }
