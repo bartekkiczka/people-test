@@ -6,6 +6,7 @@ import com.example.testfinal.exceptions.impl.job.JobDatesOverlapException;
 import com.example.testfinal.exceptions.impl.job.JobEndDateIsBeforeStartDateException;
 import com.example.testfinal.exceptions.impl.job.JobNotFoundException;
 import com.example.testfinal.exceptions.impl.person.*;
+import com.example.testfinal.exceptions.impl.upload.ImportQueueNotFoundException;
 import com.example.testfinal.exceptions.impl.upload.ImportStatusNotFoundException;
 import com.example.testfinal.exceptions.impl.upload.OtherImportRunningException;
 import com.example.testfinal.exceptions.impl.validation.ParameterNotExistsException;
@@ -213,5 +214,16 @@ public class GlobalExceptionHandler {
                 .description(request.getDescription(false))
                 .build(),
                 HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ImportQueueNotFoundException.class)
+    public ResponseEntity<ErrorMessage> handleImportQueueNotFoundException(final ImportQueueNotFoundException e, WebRequest request) {
+        return new ResponseEntity<>(ErrorMessage.builder()
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .timeStamp(LocalDateTime.now())
+                .message(e.getMessage())
+                .description(request.getDescription(false))
+                .build(),
+                HttpStatus.NOT_FOUND);
     }
 }

@@ -8,7 +8,6 @@ import com.example.testfinal.service.ImportService;
 import liquibase.exception.LiquibaseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,12 +18,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.*;
-import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -60,7 +55,6 @@ class ImportControllerTest {
         ImportStatus importStatus = ImportStatus.builder()
                 .status(UploadStatus.STARTED)
                 .processedRows(100L)
-                .timeout(100)
                 .build();
 
         //when
@@ -73,8 +67,7 @@ class ImportControllerTest {
                 .andExpect(jsonPath("$.[0].id").value(1))
                 .andExpect(jsonPath("$.[0].startDate").isNotEmpty())
                 .andExpect(jsonPath("$.[0].endDate").isNotEmpty())
-                .andExpect(jsonPath("$.[0].processedRows").value(100L))
-                .andExpect(jsonPath("$.[0].timeout").value(100));
+                .andExpect(jsonPath("$.[0].processedRows").value(100L));
     }
 
     @Test
@@ -93,7 +86,7 @@ class ImportControllerTest {
     }
 
     @Test
-    public void testUploadFileShouldThrowExceptionWhileOtherUploadRunning() throws Exception {
+    public void testUploadFileShouldInformThatOtherImportIsRunning() throws Exception {
         //given
         File csvFile = createTemporaryCsvFileWithValidData();
         MockMultipartFile file = new MockMultipartFile("file", csvFile.getName(), "text/csv",
@@ -105,7 +98,6 @@ class ImportControllerTest {
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now())
                 .processedRows(100L)
-                .timeout(100)
                 .build();
         importStatusRepository.save(importStatus);
 
@@ -114,47 +106,8 @@ class ImportControllerTest {
                         .file(file)
                         .param("timeout", "10")
                         .header(HttpHeaders.AUTHORIZATION, ADMIN_ROLE_VALUE))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.statusCode").value(400))
-                .andExpect(jsonPath("$.message").value("Another import is already in progress. Can't start a new one"))
-                .andExpect(jsonPath("$.description").value("uri=/upload"));
-    }
-
-    @Test
-    public void testUploadShouldNotStartNewImportUntilTimeoutPass() throws Exception {
-        //given
-        Clock utcClock = Clock.systemUTC();
-        ImportStatus importStatus = ImportStatus.builder()
-                .status(UploadStatus.STARTED)
-                .startDate(LocalDateTime.now(utcClock))
-                .endDate(null)
-                .processedRows(100L)
-                .timeout(2)
-                .build();
-        importStatusRepository.save(importStatus);
-
-        File csvFile = createTemporaryCsvFileWithValidData();
-        MockMultipartFile file = new MockMultipartFile("file", csvFile.getName(), "text/csv",
-                new FileInputStream(csvFile));
-
-        //when
-        mvc.perform(MockMvcRequestBuilders.multipart("/upload")
-                        .file(file)
-                        .param("timeout", "1")
-                        .header(HttpHeaders.AUTHORIZATION, ADMIN_ROLE_VALUE))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.statusCode").value(400))
-                .andExpect(jsonPath("$.message").value("Another import is already in progress. Can't start a new one"))
-                .andExpect(jsonPath("$.description").value("uri=/upload"));
-
-        Thread.sleep(2000);
-
-        //then
-        mvc.perform(MockMvcRequestBuilders.multipart("/upload")
-                        .file(file)
-                        .param("timeout", "1")
-                        .header(HttpHeaders.AUTHORIZATION, ADMIN_ROLE_VALUE))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Another import is currently Running. Your request has been added to the queue"));
     }
 
     @Test
@@ -177,7 +130,6 @@ class ImportControllerTest {
         ImportStatus status = ImportStatus.builder()
                 .status(UploadStatus.STARTED)
                 .processedRows(100L)
-                .timeout(100)
                 .build();
 
         //when
@@ -190,8 +142,7 @@ class ImportControllerTest {
                 .andExpect(jsonPath("$.status").value(status.getStatus().toString()))
                 .andExpect(jsonPath("$.startDate").isNotEmpty())
                 .andExpect(jsonPath("$.endDate").isNotEmpty())
-                .andExpect(jsonPath("$.processedRows").value(status.getProcessedRows()))
-                .andExpect(jsonPath("$.timeout").value(status.getTimeout()));
+                .andExpect(jsonPath("$.processedRows").value(status.getProcessedRows()));
     }
 
     @Test

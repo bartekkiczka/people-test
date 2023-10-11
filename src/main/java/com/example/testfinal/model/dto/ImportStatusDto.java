@@ -21,6 +21,4 @@ public class ImportStatusDto {
     private LocalDateTime endDate;
 
     private Long processedRows;
-
-    private Integer timeout;
 }

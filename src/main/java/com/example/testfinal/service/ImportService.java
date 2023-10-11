@@ -15,16 +15,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +36,7 @@ public class ImportService {
             "employment_start_date, position, salary, school_name, year_of_study, field_of_study, scholarship, " +
             "pension, years_worked, deleted) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,false)";
     private final ImportStatusRepository importStatusRepository;
+    private final ImportStatusService importStatusService;
     private final JdbcTemplate jdbcTemplate;
     private final PersonFactory personFactory;
 
@@ -45,16 +44,15 @@ public class ImportService {
         return importStatusRepository.findAll(pageable);
     }
 
-    @Async("importPeopleExecutor")
-    public void uploadFile(File file, Integer timeout) {
-        long currentProcessedRows = 0;
-        ImportStatus currentImportStatus = ImportStatus.builder()
-                .timeout(timeout)
-                .processedRows(0L)
-                .status(UploadStatus.STARTED)
-                .build();
-        importStatusRepository.save(currentImportStatus);
+    public Optional<ImportStatus> getLastImportStatus() {
+        return importStatusRepository.findTopByOrderByIdDesc();
+    }
 
+    @Async("importPeopleExecutor")
+    @Transactional
+    public void uploadFile(File file) {
+        long currentProcessedRows = 0;
+        ImportStatus currentImportStatus = importStatusService.initCurrentImportStatus();
 
         int batchSize = 100;
         List<Object[]> batchData = new ArrayList<>();
@@ -112,16 +110,19 @@ public class ImportService {
                 try {
                     personFactory.create(createPersonCommand);
                     batchData.add(rowData);
-                } catch (Exception e) {
-                    log.error("Error while processing line number: " + currentProcessedRows, e);
+                } catch (RuntimeException e) {
+                    importStatusService.updateImportStatus(currentProcessedRows, currentImportStatus, UploadStatus.FAILED);
+                    log.error("Error while processing line number : " + currentProcessedRows, e);
+                    throw new RuntimeException("Import failed");
                 }
+
                 if (currentProcessedRows % batchSize == 0) {
                     try {
                         jdbcTemplate.batchUpdate(query, batchData);
-                        importStatusRepository.save(currentImportStatus);
+                        importStatusService.updateImportStatus(currentProcessedRows, currentImportStatus, UploadStatus.STARTED);
                         batchData.clear();
                     } catch (RuntimeException e) {
-                        updateImportStatusEnd(currentProcessedRows, currentImportStatus, UploadStatus.FAILED);
+                        importStatusService.updateImportStatus(currentProcessedRows, currentImportStatus, UploadStatus.FAILED);
                         log.error("Error while processing line number : " + currentProcessedRows, e);
                         throw new RuntimeException("Import failed");
                     }
@@ -132,7 +133,7 @@ public class ImportService {
                 try {
                     jdbcTemplate.batchUpdate(query, batchData);
                 } catch (RuntimeException e) {
-                    updateImportStatusEnd(currentProcessedRows, currentImportStatus, UploadStatus.FAILED);
+                    importStatusService.updateImportStatus(currentProcessedRows, currentImportStatus, UploadStatus.FAILED);
                     log.error("Error while processing line number : " + currentProcessedRows, e);
                     throw new RuntimeException("Import failed");
                 }
@@ -142,12 +143,7 @@ public class ImportService {
         } finally {
             file.delete();
         }
-        updateImportStatusEnd(currentProcessedRows, currentImportStatus, UploadStatus.COMPLETED);
-    }
 
-    private void updateImportStatusEnd(long currentProcessedRows, ImportStatus importStatus, UploadStatus Status) {
-        importStatus.setStatus(Status);
-        importStatus.setProcessedRows(currentProcessedRows);
-        importStatusRepository.save(importStatus);
+        importStatusService.updateImportStatus(currentProcessedRows, currentImportStatus, UploadStatus.COMPLETED);
     }
 }

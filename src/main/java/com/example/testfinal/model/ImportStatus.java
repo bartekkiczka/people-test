@@ -40,7 +40,5 @@ public class ImportStatus {
     @Column(name = "processed_rows")
     private Long processedRows;
 
-    private Integer timeout;
-
     private boolean deleted = false;
 }

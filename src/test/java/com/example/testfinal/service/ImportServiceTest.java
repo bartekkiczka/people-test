@@ -53,7 +53,7 @@ class ImportServiceTest {
         assertEquals(3, personRepository.findAll(PageRequest.of(0, 10)).getContent().size());
 
         //when
-        importService.uploadFile(tempFile, 10);
+        importService.uploadFile(tempFile);
         Thread.sleep(500);
 
         //then
@@ -71,7 +71,7 @@ class ImportServiceTest {
         assertEquals(3, personRepository.findAll(PageRequest.of(0, 10)).getContent().size());
 
         //when
-        importService.uploadFile(tempFile, 10);
+        importService.uploadFile(tempFile);
         Thread.sleep(500);
 
         //then
@@ -87,7 +87,7 @@ class ImportServiceTest {
         File tempFile = createTempFile(file);
 
 
-        importService.uploadFile(tempFile, 10);
+        importService.uploadFile(tempFile);
         Thread.sleep(500);
 
         ImportStatus currentImportStatus = importStatusRepository.findTopByOrderByIdDesc().orElseThrow(ImportStatusNotFoundException::new);
@@ -125,20 +125,6 @@ class ImportServiceTest {
             writer.write("person_type,name,surname,pesel,height,weight,email,employment_start_date,position,salary,school_name,year_of_study,field_of_study,scholarship,pension,years_worked\n");
             writer.write("STUDENTT,name,surname,63195044816,10,10,email1@test.com,null,null,null,school,2,field,100,null,null\n");
         }
-
-        return tempFile;
-    }
-
-    private File createTemporaryCsvFileWithValidData2() throws IOException {
-        File tempFile = File.createTempFile("test", ".csv");
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
-            writer.write("person_type,name,surname,pesel,height,weight,email,employment_start_date,position,salary,school_name,year_of_study,field_of_study,scholarship,pension,years_worked\n");
-            for (int i = 0; i < 100000; i++) {
-                writer.write("STUDENT,name,surname," + (10000000000L + i) + ",10,10,student" + (1 + i) + "@test.com,null,null,null,school,2,field,100,null,null\n");
-            }
-        }
-
 
         return tempFile;
     }

@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 public class TestFinalApplication {
 
 	public static void main(String[] args) {
-		TestCsvGenerator.generateEventsFile();
+//		TestCsvGenerator.generateEventsFile();
 		SpringApplication.run(TestFinalApplication.class, args);
 	}
 

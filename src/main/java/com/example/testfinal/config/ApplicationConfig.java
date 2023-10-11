@@ -39,6 +39,17 @@ public class ApplicationConfig {
     }
 
     @Bean
+    public ThreadPoolTaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5); // Set the core pool size
+        executor.setMaxPoolSize(10); // Set the maximum pool size
+        executor.setQueueCapacity(25); // Set the queue capacity
+        executor.setThreadNamePrefix("MyTaskExecutor-");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean
     Clock clock(){
         return Clock.systemUTC();
     }

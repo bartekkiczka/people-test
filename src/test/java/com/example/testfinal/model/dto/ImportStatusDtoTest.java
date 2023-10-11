@@ -28,7 +28,6 @@ class ImportStatusDtoTest {
                 .startDate(LocalDateTime.now())
                 .endDate(LocalDateTime.now())
                 .processedRows(1000L)
-                .timeout(10)
                 .build();
 
         ImportStatusDto importStatusDto = modelMapper.map(importStatus, ImportStatusDto.class);
@@ -37,6 +36,5 @@ class ImportStatusDtoTest {
         assertEquals(importStatusDto.getStartDate(), importStatus.getStartDate());
         assertEquals(importStatusDto.getEndDate(), importStatus.getEndDate());
         assertEquals(importStatusDto.getProcessedRows(), importStatus.getProcessedRows());
-        assertEquals(importStatusDto.getTimeout(), importStatus.getTimeout());
     }
 }
