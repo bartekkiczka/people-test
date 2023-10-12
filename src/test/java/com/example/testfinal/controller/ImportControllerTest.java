@@ -18,8 +18,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.*;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -82,7 +87,6 @@ class ImportControllerTest {
         //when
         mvc.perform(MockMvcRequestBuilders.multipart("/upload")
                         .file(file)
-                        .param("timeout", "1")
                         .header(HttpHeaders.AUTHORIZATION, ADMIN_ROLE_VALUE))
                 .andExpect(status().isOk());
     }
@@ -156,12 +160,98 @@ class ImportControllerTest {
                 .andExpect(jsonPath("$.description").value("uri=/upload/status"));
     }
 
+    @Test
+    public void testGetStatusByIdShouldReturnStatus() throws Exception{
+        Instant fixedInstant = Instant.parse("2023-10-12T12:00:00Z");
+        ZoneId zoneId = ZoneId.of("UTC+2");
+        Clock fixedClock = Clock.fixed(fixedInstant, zoneId);
+
+        ImportStatus importStatus = ImportStatus.builder()
+                .status(UploadStatus.QUEUED)
+                .startDate(LocalDateTime.now(fixedClock))
+                .processedRows(100L)
+                .build();
+        importStatusRepository.save(importStatus);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        String expectedStartDateFormatted = importStatus.getStartDate().format(formatter);
+
+        mvc.perform(get("/upload/status/1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(importStatus.getStatus().toString()))
+                .andExpect(jsonPath("$.startDate").value(expectedStartDateFormatted))
+                .andExpect(jsonPath("$.createdDate").isNotEmpty())
+                .andExpect(jsonPath("$.endDate").isNotEmpty())
+                .andExpect(jsonPath("$.processedRows").value(importStatus.getProcessedRows()));
+    }
+
+    @Test
+    public void testGetStatusByIdShouldThrowStatusNotFoundException() throws Exception{
+        mvc.perform(get("/upload/status/999"))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.statusCode").value(404))
+                .andExpect(jsonPath("$.message").value("Import status not found"))
+                .andExpect(jsonPath("$.description").value("uri=/upload/status/999"));
+    }
+
+    @Test
+    public void testUploadShouldQueueAndUploadAllRequests() throws Exception{
+        //given
+        File csvFile = createTemporaryCsvFileWithValidData();
+        MockMultipartFile file = new MockMultipartFile("file", csvFile.getName(), "text/csv",
+                new FileInputStream(csvFile));
+
+        File csvFile2 = createTemporaryCsvFileWithValidData2();
+        MockMultipartFile file2 = new MockMultipartFile("file", csvFile.getName(), "text/csv",
+                new FileInputStream(csvFile2));
+
+        //when
+        mvc.perform(MockMvcRequestBuilders.multipart("/upload")
+                        .file(file)
+                        .header(HttpHeaders.AUTHORIZATION, ADMIN_ROLE_VALUE))
+                .andExpect(status().isOk());
+        mvc.perform(MockMvcRequestBuilders.multipart("/upload")
+                        .file(file2)
+                        .header(HttpHeaders.AUTHORIZATION, ADMIN_ROLE_VALUE))
+                .andExpect(status().isOk());
+        Thread.sleep(500);
+
+        //then
+        mvc.perform(get("/upload/status/1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("COMPLETED"));
+
+        mvc.perform(get("/upload/status/2"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("COMPLETED"));
+
+        mvc.perform(get("/people"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(5)));
+    }
+
     private File createTemporaryCsvFileWithValidData() throws IOException {
         File tempFile = File.createTempFile("test", ".csv");
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
             writer.write("person_type,name,surname,pesel,height,weight,email,employment_start_date,position,salary,school_name,year_of_study,field_of_study,scholarship,pension,years_worked\n");
             writer.write("STUDENT,name,surname,63195047816,10,10,student@test.com,null,null,null,school,2,field,100,null,null\n");
+        }
+
+        return tempFile;
+    }
+
+    private File createTemporaryCsvFileWithValidData2() throws IOException {
+        File tempFile = File.createTempFile("test2", ".csv");
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
+            writer.write("person_type,name,surname,pesel,height,weight,email,employment_start_date,position,salary,school_name,year_of_study,field_of_study,scholarship,pension,years_worked\n");
+            writer.write("STUDENT,name,surname,63194047816,10,10,student1@test.com,null,null,null,school,2,field,100,null,null\n");
         }
 
         return tempFile;

@@ -2,21 +2,26 @@ package com.example.testfinal.service;
 
 import com.example.testfinal.DatabaseCleaner;
 import com.example.testfinal.enums.UploadStatus;
-import com.example.testfinal.exceptions.impl.upload.ImportStatusNotFoundException;
+import com.example.testfinal.factory.person.PersonFactory;
 import com.example.testfinal.model.ImportStatus;
 import com.example.testfinal.repository.ImportStatusRepository;
 import com.example.testfinal.repository.PersonRepository;
 import liquibase.exception.LiquibaseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.io.*;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,6 +42,18 @@ class ImportServiceTest {
 
     @Autowired
     private DatabaseCleaner databaseCleaner;
+
+    @Autowired
+    private ImportStatusService importStatusService;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
+    private PersonFactory personFactory;
 
     @BeforeEach
     public void setup() throws LiquibaseException {
@@ -95,6 +112,19 @@ class ImportServiceTest {
                 new FileInputStream(csvFile));
         File tempFile = createTempFile(file);
 
+        Instant fixedInstant = Instant.parse("2023-10-12T12:00:00Z");
+        ZoneId zoneId = ZoneId.of("UTC+2");
+        Clock fixedClock = Clock.fixed(fixedInstant, zoneId);
+
+        ImportService tempImportService = new ImportService(
+                importStatusRepository,
+                importStatusService,
+                jdbcTemplate,
+                personFactory,
+                modelMapper,
+                fixedClock
+        );
+
         ImportStatus importStatus = ImportStatus.builder()
                 .status(UploadStatus.QUEUED)
                 .createdDate(LocalDateTime.now())
@@ -103,16 +133,20 @@ class ImportServiceTest {
                 .build();
         importStatusRepository.save(importStatus);
 
-        importService.uploadFile(tempFile, 1);
+        //when
+        tempImportService.uploadFile(tempFile, 1);
         Thread.sleep(500);
 
         ImportStatus currentImportStatus = importService.findById(1);
 
+        LocalDateTime clockDateTime = LocalDateTime.ofInstant(fixedClock.instant(), fixedClock.getZone());
+
+        //then
         assertEquals(currentImportStatus.getStatus(), UploadStatus.COMPLETED);
         assertNotNull(currentImportStatus.getCreatedDate());
+        assertEquals(currentImportStatus.getStartDate(), clockDateTime);
         assertNotNull(currentImportStatus.getEndDate());
     }
-
     private File createTempFile(MockMultipartFile file) throws IOException {
         File tempFile = File.createTempFile("temp-csv-", ".csv");
         try {
